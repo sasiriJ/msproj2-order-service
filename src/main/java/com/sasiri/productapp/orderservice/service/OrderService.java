@@ -7,12 +7,10 @@ import com.sasiri.productapp.orderservice.model.Order;
 import com.sasiri.productapp.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +34,11 @@ public class OrderService {
             orderRepository.save(order);
 
             //Send message to kafka topic
-            OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent(order.getOrderNumber(), orderRequest.userDetails().email() );
+            OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent();
+            orderPlacedEvent.setOrderNumber(order.getOrderNumber());
+            orderPlacedEvent.setEmail(orderRequest.userDetails().email());
+
+
             log.info("Start- sending orderPlacedEvent {} to kafka topic.",orderPlacedEvent);
             kafkaTemplate.send("order-placed", orderPlacedEvent);
             log.info("End- successfully sent orderPlacedEvent {} to kafka topic.",orderPlacedEvent);
